@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sistema Solar Interativo</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: black;
+      overflow: hidden;
+      font-family: sans-serif;
+      color: white;
+      transition: background 1s;
+    }
+
+    .stars {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+
+    .stars::before {
+      content: '';
+      position: absolute;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(white 1px, transparent 1px);
+      background-size: 20px 20px;
+      animation: starfield 60s linear infinite;
+      opacity: 0.3;
+    }
+
+    @keyframes starfield {
+      from { transform: translate(0, 0); }
+      to   { transform: translate(-10%, -10%); }
+    }
+
+    .solar-system {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform-style: preserve-3d;
+      transform: translate(-50%, -50%) scale(1);
+      z-index: 1;
+      transition: transform 0.3s ease;
+    }
+
+    .sun {
+      width: 100px;
+      height: 100px;
+      background: radial-gradient(circle, yellow, orange);
+      border-radius: 50%;
+      box-shadow: 0 0 60px yellow;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+    }
+
+    .orbit {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      border: 1px dashed rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: border-color 0.3s;
+    }
+
+    .orbit:hover {
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .planet {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    .planet::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      transform: translate(50%, 50%);
+      border-radius: 50%;
+    }
+
+    /* Cores e tamanhos */
+    .mercury .planet::before { width: 8px; height: 8px; background: gray; }
+    .venus   .planet::before { width: 14px; height: 14px; background: orange; }
+    .earth   .planet::before { width: 16px; height: 16px; background: blue; }
+    .mars    .planet::before { width: 12px; height: 12px; background: red; }
+    .jupiter .planet::before { width: 28px; height: 28px; background: brown; }
+    .saturn  .planet::before {
+      width: 24px; height: 24px; background: goldenrod;
+      box-shadow: 0 0 0 6px rgba(255,255,153,0.2), 0 0 0 10px rgba(255,255,153,0.1);
+    }
+    .uranus  .planet::before { width: 20px; height: 20px; background: lightblue; }
+    .neptune .planet::before { width: 18px; height: 18px; background: darkblue; }
+
+    /* Órbitas e animações */
+    .mercury { width: 120px; height: 120px; animation: rotate 3s ease-in-out infinite; }
+    .venus   { width: 160px; height: 160px; animation: rotate 5s ease-in-out infinite; }
+    .earth   { width: 200px; height: 200px; animation: rotate 7s ease-in-out infinite; }
+    .mars    { width: 240px; height: 240px; animation: rotate 9s ease-in-out infinite; }
+    .jupiter { width: 300px; height: 300px; animation: rotate 12s ease-in-out infinite; }
+    .saturn  { width: 360px; height: 360px; animation: rotate 15s ease-in-out infinite; }
+    .uranus  { width: 420px; height: 420px; animation: rotate 18s ease-in-out infinite; }
+    .neptune { width: 480px; height: 480px; animation: rotate 21s ease-in-out infinite; }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg) translateX(50%) translateY(50%); }
+      to   { transform: rotate(360deg) translateX(50%) translateY(50%); }
+    }
+
+    .moon {
+      width: 40px;
+      height: 40px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation: moonOrbit 2s linear infinite;
+    }
+
+    .moon::before {
+      content: '';
+      width: 5px;
+      height: 5px;
+      background: lightgray;
+      border-radius: 50%;
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    @keyframes moonOrbit {
+      0% { transform: rotate(0deg) translateX(20px); }
+      100% { transform: rotate(360deg) translateX(20px); }
+    }
+
+    .info-panel {
+      position: fixed;
+      right: 10px;
+      top: 10px;
+      width: 280px;
+      background: rgba(0, 0, 0, 0.7);
+      border: 1px solid #ccc;
+      padding: 15px;
+      z-index: 2;
+      border-radius: 10px;
+    }
+
+    .info-panel h2 {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .info-panel p {
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    button {
+      position: fixed;
+      left: 10px;
+      top: 10px;
+      z-index: 2;
+      padding: 8px 12px;
+      background: #222;
+      color: white;
+      border: 1px solid white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <audio id="spaceAudio" loop autoplay>
+    <source src="espaco.mp3" type="audio/mpeg">
+    Seu navegador não suporta áudio.
+  </audio>
+
+  <div class="stars"></div>
+
+  <button onclick="toggleMode()">Alternar Modo</button>
+
+  <div class="solar-system" id="system">
+    <div class="sun"></div>
+
+    <div class="orbit mercury"><div class="planet" onclick="showInfo('Mercúrio')"></div></div>
+    <div class="orbit venus"><div class="planet" onclick="showInfo('Vênus')"></div></div>
+    <div class="orbit earth">
+      <div class="planet" onclick="showInfo('Terra')"><div class="moon"></div></div>
+    </div>
+    <div class="orbit mars"><div class="planet" onclick="showInfo('Marte')"></div></div>
+    <div class="orbit jupiter"><div class="planet" onclick="showInfo('Júpiter')"></div></div>
+    <div class="orbit saturn"><div class="planet" onclick="showInfo('Saturno')"></div></div>
+    <div class="orbit uranus"><div class="planet" onclick="showInfo('Urano')"></div></div>
+    <div class="orbit neptune"><div class="planet" onclick="showInfo('Netuno')"></div></div>
+  </div>
+
+  <div class="info-panel" id="infoPanel">
+    <h2>Sistema Solar</h2>
+    <p>Clique em um planeta para ver informações detalhadas.</p>
+  </div>
+
+  <script>
+    const planetInfo = {
+      "Mercúrio": { desc: "O menor planeta do sistema solar e o mais próximo do Sol.", dist: "57,9 milhões km", rot: "58,6 dias terrestres" },
+      "Vênus": { desc: "Atmosfera densa e quente. Semelhante à Terra em tamanho.", dist: "108,2 milhões km", rot: "243 dias terrestres" },
+      "Terra": { desc: "Nosso lar. Único conhecido com vida.", dist: "149,6 milhões km", rot: "24 horas" },
+      "Marte": { desc: "O planeta vermelho. Possui calotas polares e montanhas.", dist: "227,9 milhões km", rot: "24,6 horas" },
+      "Júpiter": { desc: "Maior planeta do sistema. Tem mais de 70 luas.", dist: "778,3 milhões km", rot: "9,9 horas" },
+      "Saturno": { desc: "Famoso por seus anéis. Planeta gasoso gigante.", dist: "1,4 bilhões km", rot: "10,7 horas" },
+      "Urano": { desc: "Gira de lado. Planeta gelado azul-esverdeado.", dist: "2,9 bilhões km", rot: "17,2 horas" },
+      "Netuno": { desc: "Planeta mais distante. Ventos supersônicos.", dist: "4,5 bilhões km", rot: "16,1 horas" }
+    };
+
+    function showInfo(name) {
+      const p = planetInfo[name];
+      const panel = document.getElementById("infoPanel");
+      panel.innerHTML = `
+        <h2>${name}</h2>
+        <p>${p.desc}</p>
+        <p><strong>Distância do Sol:</strong> ${p.dist}</p>
+        <p><strong>Rotação:</strong> ${p.rot}</p>
+      `;
+    }
+
+    function toggleMode() {
+      const body = document.body;
+      const sun = document.querySelector('.sun');
+      if (body.classList.contains('day')) {
+        body.classList.remove('day');
+        body.style.background = 'black';
+        sun.style.boxShadow = '0 0 60px yellow';
+      } else {
+        body.classList.add('day');
+        body.style.background = 'linear-gradient(#87ceeb, #fff)';
+        sun.style.boxShadow = '0 0 60px gold';
+      }
+    }
+
+    // Zoom e rotação
+    const system = document.getElementById('system');
+    let scale = 1, isDragging = false, lastX = 0, rotationY = 0;
+
+    window.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      scale += e.deltaY * -0.001;
+      scale = Math.min(Math.max(0.5, scale), 2);
+      system.style.transform = `translate(-50%, -50%) scale(${scale}) rotateY(${rotationY}deg)`;
+    });
+
+    window.addEventListener('mousedown', e => { isDragging = true; lastX = e.clientX; });
+    window.addEventListener('mouseup', () => isDragging = false);
+    window.addEventListener('mousemove', e => {
+      if (isDragging) {
+        const dx = e.clientX - lastX;
+        lastX = e.clientX;
+        rotationY += dx * 0.3;
+        system.style.transform = `translate(-50%, -50%) scale(${scale}) rotateY(${rotationY}deg)`;
+      }
+    });
+
+    // Áudio: ajustar volume
+    const audio = document.getElementById("spaceAudio");
+    audio.volume = 0.3;
+  </script>
+</body>
+</html>
